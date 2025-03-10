@@ -1,0 +1,9 @@
+{
+    "name": "crumbs/api",
+    "description": "Crumbsnet's API",
+    "type": "project",
+    "minimum-stability": "stable",
+    "require": {
+        "phpmailer/phpmailer": "^6.9"
+    }
+}
