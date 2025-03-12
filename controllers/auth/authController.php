@@ -1,11 +1,12 @@
 <?php
 
 require_once './initials/conn.php';
+require_once './utils/response.php';
 
 class AuthController {
 
   
-
+  private $response;
   private $conn;
   private $data;
 
@@ -13,22 +14,11 @@ class AuthController {
   {
     $this->conn = new Connector();
     $this->conn = $this->conn->connect();
-
+    $this->response = new Response();
     $this->data = json_decode(file_get_contents('php://input'), true);
+    session_start();
   }
 
-private function setResponse($state, $data, $clubs, $contacts){
-      $response =
-      [
-          'state' => $state,
-          'data' => $data,
-          'clubs' => $clubs,
-          'contacts' => $contacts
-
-      ];
-      echo (json_encode($response));
-      exit;
-}
 
 public function authenticate() {
   $user = $this->checkUserFromToken($this->conn);
@@ -45,10 +35,10 @@ public function authenticate() {
               while ($row = mysqli_fetch_assoc($result)) {
               $this->data[] = $row;
               }
-              $contacts = getContacts($this->conn, $user);
-              $clubs = getClub($this->conn, $user);
+              $contacts = 0;//getContacts($this->conn, $user);
+              $clubs = 0;//getClub($this->conn, $user);
               $state = 'success';
-              $this->setResponse($state, $this->data, $clubs, $contacts);
+              $this->response->send($state, '', ['data' => $this->data, 'clubs' =>$clubs, 'contacts' =>$contacts]);
           }
           else {
 
@@ -56,7 +46,7 @@ public function authenticate() {
           $this->data = [];
           $clubs = [];
           $contacts = [];
-          $this->setResponse($state, $this->data, $clubs, $contacts);
+          $this->response->send($state, '', ['data' => $this->data, 'clubs' =>$clubs, 'contacts' =>$contacts]);
           }
       }
       else {
@@ -65,7 +55,7 @@ public function authenticate() {
           $this->data = [];
           $clubs = [];
           $contacts = [];
-          $this->setResponse($state, $this->data, $clubs, $contacts);
+          $this->response->send($state, '', ['data' => $this->data, 'clubs' =>$clubs, 'contacts' =>$contacts]);
           }
       }
       else {
@@ -74,7 +64,7 @@ public function authenticate() {
           $this->data = [];
           $clubs = [];
           $contacts = [];
-          $this->setResponse($state, $this->data, $clubs, $contacts);
+          $this->response->send($state, '', ['data' => $this->data, 'clubs' =>$clubs, 'contacts' =>$contacts]);
           }
 }
 
@@ -104,18 +94,20 @@ public function login() {
       $message = 'Logged in';
       $state = 'loggedin';
   
-      setResponse($state, $message);
+      $this->response->send($state, 'Logged in');
       }
       else
       {
         $message = 'Wrong password, try again.';
-        setResponse('error', $message);
+        $state = 'error';
+        $this->response->send($state, $message);
       }
     }
     else
     {
       $message = 'Account not found, try again.';
-      setResponse('error', $message);
+      $state = 'error';
+      $this->response->send($state, $message);
     }
   
   }
@@ -123,12 +115,69 @@ public function login() {
   {
     $state = 'error';
     $message = 'Please fill everything.';
-    setResponse($state, $message);
+    $this->response->send($state, $message);
   }
 }
 
 
 
+
+
+//TODO: pass conn to sub-functions from the object not the inputs
+
+
+public function register() {
+if(!empty($this->data['user']) && !empty($this->data['password']) && !empty($this->data['email']))
+{
+  $user = str_replace(' ', '', $this->data['user']);
+  $password = $this->data['password'];
+  $email = $this->data['email'];
+  $sanitizedEmail = filter_var($email, FILTER_SANITIZE_EMAIL);
+  $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+  $sql = "SELECT * FROM account WHERE user = '$user' OR email = '$sanitizedEmail'";
+  $result = mysqli_query($this->conn, $sql);
+  if(mysqli_num_rows($result) === 0) {
+    $sql = "INSERT INTO account (user, email, password) VALUES ('$user', '$sanitizedEmail', '$hashedPassword')";
+    mysqli_query($this->conn, $sql);
+    $this->createProfile($this->conn, $user, 1); // create these
+    $this->createToken($this->conn, $user);
+    $_SESSION['user'] = $user;
+    $message = 'Created account';
+    $state = 'loggedin';
+
+
+    $this->response->send($state, $message);
+
+
+  }
+  else
+  {
+    $state = 'error';
+    $message = 'An account with that name/mail already exists.';
+    $this->response->send($state, $message);
+  }
+
+}
+else
+{
+  $state = 'error';
+  $message = 'Please fill everything.';
+  $this->response->send($state, $message);
+}
+}
+
+
+
+
+
+
+
+public function logout() {
+session_destroy();
+$this->clearToken($this->conn);
+setcookie("auth_token", "", time()-3600);
+
+}
 
 
 
@@ -252,6 +301,20 @@ private function createResetCode($conn, $name, $code){
 
 private function resetResetCode($conn, $name, $code){
   $sql = "DELETE FROM reset_code WHERE user='$name'";
+  mysqli_query($conn, $sql);
+}
+
+
+
+
+
+
+
+
+
+private function createProfile($conn, $user, $points){
+  $image = 'default.png';
+  $sql = "INSERT INTO profile (name, point, description, home, relation, photo) VALUES ('$user', '$points', '', '', '', '$image')";
   mysqli_query($conn, $sql);
 }
 
