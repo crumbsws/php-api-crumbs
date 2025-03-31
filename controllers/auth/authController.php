@@ -169,7 +169,70 @@ else
 
 
 
+public function resetPassword() {
+  if(isset($data['identifier']) && !empty($data['identifier'])) { //manage data input entries
+    $input = $data['identifier'];
+    $sql = "SELECT email, user FROM account WHERE user='$input' OR email='$input'";
+    $result = mysqli_query($conn, $sql);
+    if(mysqli_num_rows($result) === 1) {
 
+        $row = mysqli_fetch_array($result);
+        $email = $row['email'];
+        $alias = $row['user'];
+        $code = rand(100000, 999999);
+        createResetCode($conn, $input, $code); //add as priv func
+
+
+        sendPRCode($code, $email, $alias, $smtpUser, $smtpPassword, $smtpServ); //add as priv func
+
+
+
+
+
+
+        $state = 'success';
+        $message = '';
+        $this->response->send($state, $message);
+        //lol
+    }
+    else {
+        $state = 'error';
+        $message = 'No accounts found with that address.';
+        $this->response->send($state, $message);     
+    }
+}
+
+if(isset($data['code']) && !empty($data['code']) && isset($data['password']) && !empty($data['password'])) {
+    $code = $data['code'];
+    $password = $data['password'];
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    $date = date('Y-m-d h:i');
+    $sql = "SELECT user FROM reset_code WHERE code='$code' AND expiry > '$date' LIMIT 1";
+    $result = mysqli_query($conn, $sql);
+    if(mysqli_num_rows($result) > 0) {
+        $row = mysqli_fetch_array($result);
+        $value = $row['user'];
+        
+        $sql = "UPDATE account SET password='$hashedPassword' WHERE user='$value' OR email='$value'";
+        if(mysqli_query($conn, $sql)){
+        resetResetCode($conn, $value, $code); //add as priv func
+        $state = 'success';
+        $message = '';
+        $this->response->send($state, $message);
+        }
+        else {
+            $state = 'error';
+            $message = 'Could not update credentials.';
+            $this->response->send($state, $message);    
+        } 
+    }
+    else {
+        $state = 'error';
+        $message = 'Code is invalid.';
+        $this->response->send($state, $message);     
+    }
+}
+  }
 
 
 public function logout() {

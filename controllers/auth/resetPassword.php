@@ -13,7 +13,7 @@ function setResponse($state, $message){
         'message' => $message
     ];
     echo (json_encode($response));
-  }
+  } 
 
   
   if(isset($data['identifier']) && !empty($data['identifier'])) {

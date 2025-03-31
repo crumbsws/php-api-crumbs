@@ -24,5 +24,10 @@ $router->add('POST', '/auth/logout', function() {
     $authController->register(); // for login fix the response structure -
 });
 
+$router->add('POST', '/auth/reset', function() {
+    $authController = new AuthController();
+    $authController->resetPassword(); // for login fix the response structure -
+});
+
 $router->dispatch();
 ?>
