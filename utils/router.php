@@ -22,7 +22,8 @@ class Router {
 
                 if(is_callable($route['callback'])) {
                     return call_user_func_array($route['callback'], []);
-                };
+                }
+              
             }
         }
     }

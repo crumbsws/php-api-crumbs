@@ -10,6 +10,13 @@ class AuthController {
   private $conn;
   private $data;
 
+  protected $smtpUser = 'smtpUser'; // SMTP user
+  protected $smtpPassword = 'smtpPassword'; // SMTP password
+  protected $smtpServ = 'smtpServ'; // SMTP server
+  protected $smtpPort = 'smtpPort'; // SMTP port
+
+
+
   public function __construct()
   {
     $this->conn = new Connector();
@@ -135,7 +142,7 @@ if(!empty($this->data['user']) && !empty($this->data['password']) && !empty($thi
   $sanitizedEmail = filter_var($email, FILTER_SANITIZE_EMAIL);
   $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
   $sql = "SELECT * FROM account WHERE user = '$user' OR email = '$sanitizedEmail'";
-  $result = mysqli_query($this->conn, $sql);
+  $result = mysqli_query($this->conn, $sql); 
   if(mysqli_num_rows($result) === 0) {
     $sql = "INSERT INTO account (user, email, password) VALUES ('$user', '$sanitizedEmail', '$hashedPassword')";
     mysqli_query($this->conn, $sql);
@@ -170,20 +177,20 @@ else
 
 
 public function resetPassword() {
-  if(isset($data['identifier']) && !empty($data['identifier'])) { //manage data input entries
-    $input = $data['identifier'];
+  if(isset($this->conn['identifier']) && !empty($this->conn['identifier'])) { //manage data input entries
+    $input = $this->conn['identifier'];
     $sql = "SELECT email, user FROM account WHERE user='$input' OR email='$input'";
-    $result = mysqli_query($conn, $sql);
+    $result = mysqli_query($this->conn, $sql);
     if(mysqli_num_rows($result) === 1) {
 
         $row = mysqli_fetch_array($result);
         $email = $row['email'];
         $alias = $row['user'];
         $code = rand(100000, 999999);
-        createResetCode($conn, $input, $code); //add as priv func
+        createResetCode($input, $code); //add as priv func
 
 
-        sendPRCode($code, $email, $alias, $smtpUser, $smtpPassword, $smtpServ); //add as priv func
+        sendPRCode($code, $email, $alias, $this->smtpUser,  $this->smtpPassword,  $this->smtpServ); //add as priv func
 
 
 
@@ -202,20 +209,20 @@ public function resetPassword() {
     }
 }
 
-if(isset($data['code']) && !empty($data['code']) && isset($data['password']) && !empty($data['password'])) {
-    $code = $data['code'];
-    $password = $data['password'];
+if(isset($this->conn['code']) && !empty($this->conn['code']) && isset($this->conn['password']) && !empty($this->conn['password'])) {
+    $code = $this->conn['code'];
+    $password = $this->conn['password'];
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     $date = date('Y-m-d h:i');
     $sql = "SELECT user FROM reset_code WHERE code='$code' AND expiry > '$date' LIMIT 1";
-    $result = mysqli_query($conn, $sql);
+    $result = mysqli_query($this->conn, $sql);
     if(mysqli_num_rows($result) > 0) {
         $row = mysqli_fetch_array($result);
         $value = $row['user'];
         
         $sql = "UPDATE account SET password='$hashedPassword' WHERE user='$value' OR email='$value'";
-        if(mysqli_query($conn, $sql)){
-        resetResetCode($conn, $value, $code); //add as priv func
+        if(mysqli_query($this->conn, $sql)){
+        resetResetCode($value, $code); //add as priv func
         $state = 'success';
         $message = '';
         $this->response->send($state, $message);
@@ -247,13 +254,13 @@ setcookie("auth_token", "", time()-3600);
 
 
 
-private function createToken($conn, $name){
+private function createToken( $name){
   $token = bin2hex(random_bytes(16));
   $expiry = date('Y-m-d h:i', strtotime('+30 days'));
   $sql = "INSERT INTO auth_token (user, token, expiry) VALUES ('$name', '$token', '$expiry')";
   setcookie('auth_token', $token, time() + (30 * 24 * 60 * 60), "/", "", true, true);
 
-  mysqli_query($conn, $sql);
+  mysqli_query($this->conn, $sql);
 }
 
 
@@ -271,12 +278,12 @@ private function createToken($conn, $name){
 
 
 
-private function checkUserFromToken($conn){
+private function checkUserFromToken(){
   if(isset($_COOKIE['auth_token'])){
     $token = $_COOKIE['auth_token'];
     $date = date('Y-m-d h:i');
     $sql = "SELECT user FROM auth_token WHERE token='$token' AND expiry > '$date'";
-    $result = mysqli_query($conn, $sql);
+    $result = mysqli_query($this->conn, $sql);
     $row = mysqli_fetch_array($result);
     if (mysqli_num_rows($result) === 1) {
       return $row['user'];
@@ -308,11 +315,11 @@ private function checkUserFromToken($conn){
 
 
 
-private function clearToken($conn){
+private function clearToken(){
   if(isset($_COOKIE['auth_token'])){
     $token = $_COOKIE['auth_token'];
     $sql = "DELETE FROM auth_token WHERE token='$token'";
-    $result = mysqli_query($conn, $sql);
+    $result = mysqli_query($this->conn, $sql);
   }
 }
 
@@ -327,10 +334,10 @@ private function clearToken($conn){
 
 
 
-private function resetToken($conn, $user){
+private function resetToken($user){
 
     $sql = "DELETE FROM auth_token WHERE user='$user'";
-    $result = mysqli_query($conn, $sql);
+    $result = mysqli_query($this->conn, $sql);
 }
 
 
@@ -345,11 +352,11 @@ private function resetToken($conn, $user){
 
 
 
-private function createResetCode($conn, $name, $code){
+private function createResetCode($name, $code){
   $expiry = date('Y-m-d h:i', strtotime('+2 days'));
   $sql = "INSERT INTO reset_code (user, code, expiry) VALUES ('$name', '$code', '$expiry')";
 
-  mysqli_query($conn, $sql);
+  mysqli_query($this->conn, $sql);
 }
 
 
@@ -362,9 +369,9 @@ private function createResetCode($conn, $name, $code){
 
 
 
-private function resetResetCode($conn, $name, $code){
+private function resetResetCode($name, $code){
   $sql = "DELETE FROM reset_code WHERE user='$name'";
-  mysqli_query($conn, $sql);
+  mysqli_query($this->conn, $sql);
 }
 
 
@@ -375,10 +382,10 @@ private function resetResetCode($conn, $name, $code){
 
 
 
-private function createProfile($conn, $user, $points){
+private function createProfile($user, $points){
   $image = 'default.png';
   $sql = "INSERT INTO profile (name, point, description, home, relation, photo) VALUES ('$user', '$points', '', '', '', '$image')";
-  mysqli_query($conn, $sql);
+  mysqli_query($this->conn, $sql);
 }
 
 
