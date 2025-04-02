@@ -2,6 +2,7 @@
 require_once './utils/router.php';
 require_once './controllers/auth/authController.php';
 require_once './controllers/clubs/clubController.php';
+require_once './controllers/requests/requestsController.php';
 
 $router = new Router();
 
@@ -12,56 +13,72 @@ $router->add('POST', '/auth/verify', function() {
 
 $router->add('POST', '/auth/login', function() {
     $authController = new AuthController();
-    $authController->login(); // for login fix the response structure -
+    $authController->login(); 
 });
 
 $router->add('POST', '/auth/register', function() {
     $authController = new AuthController();
-    $authController->register(); // for login fix the response structure -
+    $authController->register(); 
 });
 
 $router->add('POST', '/auth/logout', function() {
     $authController = new AuthController();
-    $authController->register(); // for login fix the response structure -
+    $authController->register(); 
 });
 
 $router->add('POST', '/auth/reset', function() {
     $authController = new AuthController();
-    $authController->resetPassword(); // for login fix the response structure -
+    $authController->resetPassword(); 
 });
 
 
 
 $router->add('GET', '/clubs/get', function() {
     $clubController = new ClubController();
-    $clubController->getClub(); // for login fix the response structure -
+    $clubController->getClub(); 
 });
 
 $router->add('POST', '/clubs/create', function() {
     $clubController = new ClubController();
-    $clubController->createClub(); // for login fix the response structure -
+    $clubController->createClub(); 
 });
 
 $router->add('POST', '/clubs/update', function() {
     $clubController = new ClubController();
-    $clubController->updateClub(); // for login fix the response structure -
+    $clubController->updateClub(); 
 });
 
 $router->add('POST', '/clubs/leave', function() {
     $clubController = new ClubController();
-    $clubController->leaveClub(); // for login fix the response structure -
+    $clubController->leaveClub(); 
 });
 
 $router->add('GET', '/clubs/members/get', function() {
     $clubController = new ClubController();
-    $clubController->getClubMembers(); // for login fix the response structure -
+    $clubController->getClubMembers(); 
 });
 
 $router->add('POST', '/clubs/members/ban', function() {
     $clubController = new ClubController();
-    $clubController->banClubMembers(); // for login fix the response structure -
+    $clubController->banClubMembers(); 
 });
 
+
+
+$router->add('GET', '/requests/get', function() {
+    $requestsController = new RequestsController();
+    $requestsController->getRequests(); 
+});
+
+$router->add('POST', '/requests/send', function() {
+    $requestsController = new RequestsController();
+    $requestsController->sendRequest(); 
+});
+
+$router->add('POST', '/requests/accept', function() {
+    $requestsController = new RequestsController();
+    $requestsController->acceptRequest(); 
+});
 
 $router->dispatch();
 ?>

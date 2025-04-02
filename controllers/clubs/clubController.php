@@ -98,8 +98,8 @@ class ClubController
 
     public function createClub() //use empty for posts, isset for gets
     {
-        if (!empty($this->conn['name'])) {
-            $name = str_replace(' ', '', $this->conn['name']);
+        if (!empty($this->data['name'])) {
+            $name = str_replace(' ', '', $this->data['name']);
             $sql = "SELECT * FROM clubs WHERE name='$name'";
             $result = mysqli_query($this->conn, $sql);
             if (mysqli_num_rows($result) === 0) {
@@ -314,20 +314,29 @@ class ClubController
         if (!empty($this->data['club']) && !empty($this->data['user'])) {
             $club = $this->data['club'];
             $user = $_SESSION['user'];
-            $userToBan = $this->data['user'];
+            $usersToBan = $this->data['users'];
             $sql = "SELECT * FROM clubs WHERE name='$club' AND founder='$user'";
             $result = mysqli_query($this->conn, $sql);
             if(mysqli_num_rows($result) > 0) {
-                $sql = "DELETE FROM club_user WHERE club='$club' AND user='$userToBan'";
-                if (mysqli_query($this->conn, $sql)) {
-                    $state = 'success';
-                    $message = 'User banned.';
-                    $this->response->send($state, $message, []);
-                } else {
-                    $state = 'error';
-                    $message = 'Error banning user.';
-                    $this->response->send($state, $message, []);
+                $count = count($usersToBan);
+                $i = 0;
+                foreach ($usersToBan as $userToBan) {
+                    $sql = "DELETE FROM club_user WHERE club='$club' AND user='$userToBan'";           
+                    if (mysqli_query($this->conn, $sql)) {
+                        if(++$i === $count) {
+                            $state = 'success';
+                            $message = 'Users banned ';
+                            $this->response->send($state, $message, []);
+                        }
+  
+                    } else {
+                        $state = 'error';
+                        $message = 'Error banning user: ' . $userToBan;
+                        $this->response->send($state, $message, []);
+                        exit;
+                    }
                 }
+
             } else {
                 $state = 'error';
                 $message = 'You are not the founder of this club.';

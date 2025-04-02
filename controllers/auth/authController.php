@@ -28,7 +28,7 @@ class AuthController {
 
 
 public function authenticate() {
-  $user = $this->checkUserFromToken($this->conn);
+  $user = $this->checkUserFromToken();
 
   if ($user) {
 
@@ -97,7 +97,7 @@ public function login() {
       if(password_verify($password, $row['password']))
       {
       $_SESSION['user'] = $user;
-      $this->createToken($this->conn, $user);
+      $this->createToken($user);
       $message = 'Logged in';
       $state = 'loggedin';
   
@@ -146,8 +146,8 @@ if(!empty($this->data['user']) && !empty($this->data['password']) && !empty($thi
   if(mysqli_num_rows($result) === 0) {
     $sql = "INSERT INTO account (user, email, password) VALUES ('$user', '$sanitizedEmail', '$hashedPassword')";
     mysqli_query($this->conn, $sql);
-    $this->createProfile($this->conn, $user, 1); // create these
-    $this->createToken($this->conn, $user);
+    $this->createProfile( $user, 1); // create these
+    $this->createToken($user);
     $_SESSION['user'] = $user;
     $message = 'Created account';
     $state = 'loggedin';
@@ -177,8 +177,8 @@ else
 
 
 public function resetPassword() {
-  if(isset($this->conn['identifier']) && !empty($this->conn['identifier'])) { //manage data input entries
-    $input = $this->conn['identifier'];
+  if(isset($this->data['identifier']) && !empty($this->data['identifier'])) { //manage data input entries
+    $input = $this->data['identifier'];
     $sql = "SELECT email, user FROM account WHERE user='$input' OR email='$input'";
     $result = mysqli_query($this->conn, $sql);
     if(mysqli_num_rows($result) === 1) {
@@ -209,9 +209,9 @@ public function resetPassword() {
     }
 }
 
-if(isset($this->conn['code']) && !empty($this->conn['code']) && isset($this->conn['password']) && !empty($this->conn['password'])) {
-    $code = $this->conn['code'];
-    $password = $this->conn['password'];
+if(isset($this->data['code']) && !empty($this->data['code']) && isset($this->data['password']) && !empty($this->data['password'])) {
+    $code = $this->data['code'];
+    $password = $this->data['password'];
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     $date = date('Y-m-d h:i');
     $sql = "SELECT user FROM reset_code WHERE code='$code' AND expiry > '$date' LIMIT 1";
@@ -244,7 +244,7 @@ if(isset($this->conn['code']) && !empty($this->conn['code']) && isset($this->con
 
 public function logout() {
 session_destroy();
-$this->clearToken($this->conn);
+$this->clearToken();
 setcookie("auth_token", "", time()-3600);
 
 }
