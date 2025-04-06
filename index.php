@@ -3,6 +3,7 @@ require_once './utils/router.php';
 require_once './controllers/auth/authController.php';
 require_once './controllers/clubs/clubController.php';
 require_once './controllers/requests/requestsController.php';
+require_once './controllers/content/contentController.php';
 
 $router = new Router();
 
@@ -79,6 +80,34 @@ $router->add('POST', '/requests/accept', function() {
     $requestsController = new RequestsController();
     $requestsController->acceptRequest(); 
 });
+
+
+
+$router->add('GET', '/contents/posts', function() {
+    $requestsController = new ContentController();
+    $requestsController->getPosts(); 
+});
+
+$router->add('GET', '/contents/pins', function() {
+    $requestsController = new ContentController();
+    $requestsController->getPins(); 
+});
+
+$router->add('GET', '/contents/diary', function() {
+    $requestsController = new ContentController();
+    $requestsController->getDiary(); 
+});
+
+$router->add('GET', '/contents/gossips', function() {
+    $requestsController = new ContentController();
+    $requestsController->getGossips(); 
+});
+
+$router->add('GET', '/contents/trends', function() {
+    $requestsController = new ContentController();
+    $requestsController->getTrends(); 
+});
+
 
 $router->dispatch();
 ?>

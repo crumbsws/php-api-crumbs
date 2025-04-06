@@ -187,7 +187,7 @@ public function resetPassword() {
         $email = $row['email'];
         $alias = $row['user'];
         $code = rand(100000, 999999);
-        createResetCode($input, $code); //add as priv func
+        $this->createResetCode($input, $code); //add as priv func
 
 
         sendPRCode($code, $email, $alias, $this->smtpUser,  $this->smtpPassword,  $this->smtpServ); //add as priv func
@@ -222,7 +222,7 @@ if(isset($this->data['code']) && !empty($this->data['code']) && isset($this->dat
         
         $sql = "UPDATE account SET password='$hashedPassword' WHERE user='$value' OR email='$value'";
         if(mysqli_query($this->conn, $sql)){
-        resetResetCode($value, $code); //add as priv func
+        $this->resetResetCode($value, $code); //add as priv func
         $state = 'success';
         $message = '';
         $this->response->send($state, $message);
