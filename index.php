@@ -4,6 +4,7 @@ require_once './controllers/auth/authController.php';
 require_once './controllers/clubs/clubController.php';
 require_once './controllers/requests/requestsController.php';
 require_once './controllers/content/contentController.php';
+require_once './controllers/content/profileController.php';
 
 $router = new Router();
 
@@ -84,30 +85,35 @@ $router->add('POST', '/requests/accept', function() {
 
 
 $router->add('GET', '/contents/posts', function() {
-    $requestsController = new ContentController();
-    $requestsController->getPosts(); 
+    $contentController = new ContentController();
+    $contentController->getPosts(); 
 });
 
 $router->add('GET', '/contents/pins', function() {
-    $requestsController = new ContentController();
-    $requestsController->getPins(); 
+    $$contentController = new ContentController();
+    $contentController->getPins(); 
 });
 
 $router->add('GET', '/contents/diary', function() {
-    $requestsController = new ContentController();
-    $requestsController->getDiary(); 
+    $contentController = new ContentController();
+    $contentController->getDiary(); 
 });
 
 $router->add('GET', '/contents/gossips', function() {
-    $requestsController = new ContentController();
-    $requestsController->getGossips(); 
+    $contentController = new ContentController();
+    $contentController->getGossips(); 
 });
 
 $router->add('GET', '/contents/trends', function() {
-    $requestsController = new ContentController();
-    $requestsController->getTrends(); 
+    $contentController = new ContentController();
+    $contentController->getTrends(); 
 });
 
+
+$router->add('GET', '/profiles/get', function() {
+    $profileController = new ContentController();
+    $profileController->getProfile(); 
+});
 
 $router->dispatch();
 ?>
