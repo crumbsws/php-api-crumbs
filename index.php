@@ -4,6 +4,7 @@ require_once './controllers/auth/authController.php';
 require_once './controllers/clubs/clubController.php';
 require_once './controllers/requests/requestsController.php';
 require_once './controllers/content/contentController.php';
+require_once './controllers/content/publishController.php';
 
 $router = new Router();
 
@@ -108,6 +109,26 @@ $router->add('GET', '/contents/trends', function() {
     $requestsController->getTrends(); 
 });
 
+
+$router->add('POST', '/publish/post', function() {
+    $publishController = new PublishController();
+    $publishController->createPost();
+});
+
+$router->add('POST', '/publish/pin', function() {
+    $publishController = new PublishController();
+    $publishController->createPin();
+});
+
+$router->add('POST', '/publish/note', function() {
+    $publishController = new PublishController();
+    $publishController->createNote();
+});
+
+$router->add('POST', '/publish/diary', function() {
+    $publishController = new PublishController();
+    $publishController->createDiary();
+});
 
 $router->dispatch();
 ?>
