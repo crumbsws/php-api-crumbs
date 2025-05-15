@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => 'crumbs/api',
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => 'a0b920dcf5d3fb7d8cfdfff024d5de81a953f8f5',
+        'type' => 'project',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => true,
+    ),
+    'versions' => array(
+        'crumbs/api' => array(
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => 'a0b920dcf5d3fb7d8cfdfff024d5de81a953f8f5',
+            'type' => 'project',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'phpmailer/phpmailer' => array(
+            'pretty_version' => 'v6.9.3',
+            'version' => '6.9.3.0',
+            'reference' => '2f5c94fe7493efc213f643c23b1b1c249d40f47e',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phpmailer/phpmailer',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'phpstan/phpstan' => array(
+            'pretty_version' => '2.1.14',
+            'version' => '2.1.14.0',
+            'reference' => '8f2e03099cac24ff3b379864d171c5acbfc6b9a2',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phpstan/phpstan',
+            'aliases' => array(),
+            'dev_requirement' => true,
+        ),
+    ),
+);
