@@ -2,13 +2,12 @@
 
 require_once './initials/conn.php';
 require_once './utils/response.php';
+require_once './controllers/AppController.php';
 
-class AuthController {
+class AuthController extends AppController{
 
   
-  private $response;
-  private $conn;
-  private $data;
+
 
   protected $smtpUser = 'smtpUser'; // SMTP user
   protected $smtpPassword = 'smtpPassword'; // SMTP password
@@ -17,14 +16,7 @@ class AuthController {
 
 
 
-  public function __construct()
-  {
-    $this->conn = new Connector();
-    $this->conn = $this->conn->connect();
-    $this->response = new Response();
-    $this->data = json_decode(file_get_contents('php://input'), true);
-    session_start();
-  }
+
 
 
 public function authenticate() {
