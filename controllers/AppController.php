@@ -1,15 +1,15 @@
 <?php
 
 
-require_once './initials/conn.php';
-require_once './utils/response.php';
+require_once './utils/DBConnector.php';
+require_once './utils/Response.php';
 
 class AppController {
 
 
-    private $response;
-    private $conn;
-    private $data;
+    protected $response;
+    protected $conn;
+    protected $data;
 
 
 
@@ -23,7 +23,7 @@ class AppController {
             $_POST ?? [],
             json_decode(file_get_contents('php://input'), true) ?? []
         );
-        session_start();
+        
     }
     
 }

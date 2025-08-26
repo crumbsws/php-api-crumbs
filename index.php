@@ -1,14 +1,23 @@
 <?php 
-require_once './utils/router.php';
+
+session_start();
+
+require_once './utils/Router.php';
 require_once './controllers/auth/authController.php';
 require_once './controllers/clubs/clubController.php';
+require_once './controllers/users/profileController.php';
 require_once './controllers/requests/requestsController.php';
 require_once './controllers/content/contentController.php';
 require_once './controllers/content/publishController.php';
+require_once './controllers/messages/messageController.php';
+require_once './controllers/misc/searchController.php';
+
+
+
 
 $router = new Router();
 
-$router->add('POST', '/auth/verify', function() {
+$router->add('GET', '/auth/verify', function() {
     $authController = new AuthController();
     $authController->authenticate();
 });
@@ -25,12 +34,19 @@ $router->add('POST', '/auth/register', function() {
 
 $router->add('POST', '/auth/logout', function() {
     $authController = new AuthController();
-    $authController->register(); 
+    $authController->logout(); 
 });
 
 $router->add('POST', '/auth/reset', function() {
     $authController = new AuthController();
     $authController->resetPassword(); 
+});
+
+
+
+$router->add('GET', '/profile/get', function() {
+    $clubController = new ProfileController();
+    $clubController->getProfile(); 
 });
 
 
@@ -53,6 +69,11 @@ $router->add('POST', '/clubs/update', function() {
 $router->add('POST', '/clubs/leave', function() {
     $clubController = new ClubController();
     $clubController->leaveClub(); 
+});
+
+$router->add('POST', '/clubs/join', function() {
+    $clubController = new ClubController();
+    $clubController->joinClub(); 
 });
 
 $router->add('GET', '/clubs/members/get', function() {
@@ -83,6 +104,10 @@ $router->add('POST', '/requests/accept', function() {
 });
 
 
+$router->add('POST', '/contents/reactions', function() {
+    $requestsController = new ContentController();
+    $requestsController->getReactions();
+});
 
 $router->add('GET', '/contents/posts', function() {
     $requestsController = new ContentController();
@@ -104,9 +129,19 @@ $router->add('GET', '/contents/gossips', function() {
     $requestsController->getGossips(); 
 });
 
-$router->add('GET', '/contents/trends', function() {
+$router->add('GET', '/contents/trending', function() {
     $requestsController = new ContentController();
     $requestsController->getTrends(); 
+});
+
+$router->add('GET', '/contents/friends', function() {
+    $publishController = new ContentController();
+    $publishController->getFriends();
+});
+
+$router->add('GET', '/contents/gallery', function() {
+    $publishController = new ContentController();
+    $publishController->getGallery();
 });
 
 
@@ -120,14 +155,57 @@ $router->add('POST', '/publish/pin', function() {
     $publishController->createPin();
 });
 
-$router->add('POST', '/publish/note', function() {
+$router->add('POST', '/publish/gossip', function() {
     $publishController = new PublishController();
-    $publishController->createNote();
+    $publishController->createGossip();
 });
 
 $router->add('POST', '/publish/diary', function() {
     $publishController = new PublishController();
     $publishController->createDiary();
+});
+
+$router->add('POST', '/publish/reaction', function() {
+    $publishController = new PublishController();
+    $publishController->createReaction();
+});
+
+
+$router->add('POST', '/messages/send', function() {
+    $publishController = new MessageController();
+    $publishController->createMessage();
+});
+
+$router->add('GET', '/messages/channel', function() {
+    $publishController = new MessageController();
+    $publishController->getChannel();
+});
+
+$router->add('GET', '/messages/get', function() {
+    $publishController = new MessageController();
+    $publishController->getMessages();
+});
+
+$router->add('GET', '/messages/conversations', function() {
+    $publishController = new MessageController();
+    $publishController->getConversations();
+});
+
+$router->add('POST', '/messages/prepare', function() {
+    $publishController = new MessageController();
+    $publishController->prepareChannel();
+});
+
+$router->add('POST', '/messages/upload', function() {
+    $publishController = new MessageController();
+    $publishController->uploadMessageAssets();
+});
+
+$router->add('POST', '/search', function() {
+
+    $searchController = new SearchController();
+    $searchController->search();
+
 });
 
 $router->dispatch();

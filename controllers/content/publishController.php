@@ -1,14 +1,14 @@
 <?php
 
 
-require_once './initials/conn.php';
-require_once './utils/response.php';
+require_once './utils/DBConnector.php';
+require_once './utils/Response.php';
 require_once './controllers/AppController.php';
 
 class PublishController extends AppController
 {
 
-    
+
 
 
     public function createPost()
@@ -28,7 +28,8 @@ class PublishController extends AppController
                     $conf = $newName;
                 } else {
                     $state = 'error';
-                    setResponse($state, []);
+                    $message = 'File transfer failed.';
+                    $this->response->send($state, $message);
                     exit;
                 }
             } else {
@@ -85,7 +86,7 @@ class PublishController extends AppController
             if (mysqli_query($this->conn, $sql)) {
                 $message = 'Post created successfully.';
                 $state = 'success';
-                $this->response->send($state, $message);
+                $this->response->send($state, $message, ['url' => $url]);
 
             } else {
                 $message = 'Error in creating post.';
@@ -183,7 +184,7 @@ class PublishController extends AppController
         }
     }
 
-    public function createNote()
+    public function createGossip()
     {
         if (!empty($this->data['note']) && !empty($this->data['club'])) {
             $user = $_SESSION['user'];
@@ -206,22 +207,43 @@ class PublishController extends AppController
         }
     }
 
-    public function createReaction() 
+    public function createReaction()
     {
-        if(isset($this->data['id'])){
-            $id = $this->data['id'];
-            $sql = "SELECT reaction.rating, reaction.name, profile.photo FROM reaction INNER JOIN profile on profile.name=reaction.name WHERE url='$id'";
-            $result = mysqli_query($this->conn, $sql);
-            $response = array();
-            
-            while($row = mysqli_fetch_assoc($result)) {
-                $this->response->send('success', 'Returned reactions', ['data' => $row]);
+
+
+
+
+
+        if (!empty($this->data['value']) && !empty($this->data['url'])) {
+            $user = $_SESSION['user'];
+            $url = $this->data['url'];
+            $date = date("Y-m-d h:i");
+            $rating = mysqli_real_escape_string($this->conn, $this->data['value']);
+            $sql = "DELETE FROM reaction WHERE name='$user' AND url='$url'";
+            if (mysqli_query($this->conn, $sql)) {
+                $sql = "INSERT IGNORE INTO reaction (name, rating, url, date) VALUES ('$user', '$rating', '$url', '$date')";
+                if (mysqli_query($this->conn, $sql)) {
+                    $state = 'success';
+                    $message = 'Reaction sent';
+                    $this->response->send($state, $message);
+                } else {
+                    $state = 'error';
+                    $message = 'Failed to send reaction';
+                    $this->response->send($state, $message);
+                }
             }
-        
         }
-        else{
-            $this->response->send('error', 'No reactions found');
-        }    
+
+
+
+
+
+
+
+
+
+
+
     }
 
 }

@@ -1,8 +1,8 @@
 <?php
 
 
-require_once './initials/conn.php';
-require_once './utils/response.php';
+require_once './utils/DBConnector.php';
+require_once './utils/Response.php';
 require_once './controllers/AppController.php';
 
 class RequestsController extends AppController
@@ -17,7 +17,7 @@ class RequestsController extends AppController
         $user = $_SESSION['user']; 
         
 
-        if(isset($this->data['user']) && $this->data['status'] = 'unseen'){
+        if(!empty($this->data['status']) && $this->data['status'] = 'unseen'){
             $sql = "SELECT * FROM requests WHERE status='unseen' AND receiver='$user'";
             $data = array();
             if($result = mysqli_query($this->conn, $sql)) {
@@ -43,9 +43,10 @@ class RequestsController extends AppController
                 $sql = "SELECT * FROM requests WHERE receiver='$user' OR sender='$user' ORDER BY date DESC";
                 $data = array();
                 if($result = mysqli_query($this->conn, $sql)) {
-            
-                while($row = mysqli_fetch_array($result)) {
-                $data[] = $row;
+                
+                
+                while ($row = mysqli_fetch_assoc($result)) {
+                    $data[] = $row;
                 }
                 $message = 'Returned requests';
                 $state = 'success';

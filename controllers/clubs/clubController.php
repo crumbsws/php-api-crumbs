@@ -1,30 +1,51 @@
 <?php
 
 require_once './controllers/AppController.php';
-require_once './initials/conn.php';
-require_once './utils/response.php';
+require_once './utils/DBConnector.php';
+require_once './utils/Response.php';
 
 class ClubController extends AppController
 {
 
+
+    public function joinClub()
+    {
+        if (!empty($this->data['club'])) {
+            $club = $this->data['club'];
+            $user = $_SESSION['user'];
+            $sql = "SELECT * FROM clubs WHERE name='$club'";
+            $result = mysqli_query($this->conn, $sql);
+            if (mysqli_num_rows($result) === 1) {
+                $sql = "INSERT IGNORE INTO club_user (user, club) VALUES ('$user', '$club')";
+                if (mysqli_query($this->conn, $sql)) {
+                    $state = 'success';
+                    $message = 'Joined the club.';
+                    $this->response->send($state, $message);
+                } else {
+                    $state = 'error';
+                    $message = 'Error joining club.';
+                    $this->response->send($state, $message);
+                }
+            } else {
+                $state = 'error';
+                $message = 'Club not found.';
+                $this->response->send($state, $message);
+            }
+        }
+    }
    
     public function getClub()
     {
 
 
         if (isset($this->data['user'])) {
-            error_log('User found in getClub');
+            
             $findClubOf = $this->data['user'];
             $sql = "SELECT * FROM clubs WHERE name IN(SELECT club FROM club_user WHERE user='$findClubOf')";
             $data = array();
 
             if ($result = mysqli_query($this->conn, $sql)) {
-                if (mysqli_num_rows($result) == 0) {
-                    $state = 'error';
-                    $message = 'No clubs found';
-                    $this->response->send($state, $message, []);
-                    return;
-                }
+          
                 while ($row = mysqli_fetch_array($result)) {
                     $data[] = $row;
                 }
@@ -92,7 +113,7 @@ class ClubController extends AppController
                 $image = 'default.png';
                 $sql = "INSERT INTO clubs (name, founder, description, card, point, photo) VALUES ('$name', '$founder', '$description', '$card','$point', '$image')";
                 if (mysqli_query($this->conn, $sql)) {
-                    $sql = "INSERT INTO club_user (user, club, role) VALUES ('$founder', '$name', 'founder')";
+                    $sql = "INSERT INTO club_user (user, club) VALUES ('$founder', '$name')";
                     if (mysqli_query($this->conn, $sql)) {
                         $state = 'success';
                         $message = 'Club created successfully';
@@ -267,9 +288,9 @@ class ClubController extends AppController
 
     public function getClubMembers()
     {
-        if (!empty($this->data['club'])) {
-            $club = $this->data['club'];
-            $sql = "SELECT name FROM club_user WHERE club='$club'";
+        if (!empty($this->data['name'])) {
+            $club = $this->data['name'];
+            $sql = "SELECT profile.* FROM club_user JOIN profile ON club_user.user=profile.name WHERE club='$club'";
             $data = array();
             if ($result = mysqli_query($this->conn, $sql)) {
                 while ($row = mysqli_fetch_array($result)) {
@@ -293,7 +314,7 @@ class ClubController extends AppController
 
     public function banClubMembers()
     {
-        if (!empty($this->data['club']) && !empty($this->data['user'])) {
+        if (!empty($this->data['club']) && !empty($this->data['users'])) {
             $club = $this->data['club'];
             $user = $_SESSION['user'];
             $usersToBan = $this->data['users'];

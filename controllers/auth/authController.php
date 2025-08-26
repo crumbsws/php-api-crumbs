@@ -1,18 +1,18 @@
 <?php
-
-require_once './initials/conn.php';
-require_once './utils/response.php';
+require_once './utils/DBConnector.php';
+require_once './utils/Response.php';
 require_once './controllers/AppController.php';
+require_once './controllers/users/profileController.php';
 
 class AuthController extends AppController{
 
   
 
 
-  protected $smtpUser = 'smtpUser'; // SMTP user
-  protected $smtpPassword = 'smtpPassword'; // SMTP password
-  protected $smtpServ = 'smtpServ'; // SMTP server
-  protected $smtpPort = 'smtpPort'; // SMTP port
+  private $smtpUser = 'smtpUser'; // SMTP user
+  private $smtpPassword = 'smtpPassword'; // SMTP password
+  private $smtpServ = 'smtpServ'; // SMTP server
+  private $smtpPort = 'smtpPort'; // SMTP port
 
 
 
@@ -34,8 +34,9 @@ public function authenticate() {
               while ($row = mysqli_fetch_assoc($result)) {
               $this->data[] = $row;
               }
-              $contacts = 0;//getContacts($this->conn, $user);
-              $clubs = 0;//getClub($this->conn, $user);
+              $profileController = new ProfileController();
+              $contacts = $profileController->getContacts($user);
+              $clubs = $profileController->getClubs($user);
               $state = 'success';
               $this->response->send($state, '', ['data' => $this->data, 'clubs' =>$clubs, 'contacts' =>$contacts]);
           }
@@ -182,7 +183,7 @@ public function resetPassword() {
         $this->createResetCode($input, $code); //add as priv func
 
 
-        sendPRCode($code, $email, $alias, $this->smtpUser,  $this->smtpPassword,  $this->smtpServ); //add as priv func
+        $this->sendPRCode($code, $email, $alias, $this->smtpUser,  $this->smtpPassword,  $this->smtpServ); //add as priv func
 
 
 
@@ -311,7 +312,7 @@ private function clearToken(){
   if(isset($_COOKIE['auth_token'])){
     $token = $_COOKIE['auth_token'];
     $sql = "DELETE FROM auth_token WHERE token='$token'";
-    $result = mysqli_query($this->conn, $sql);
+    mysqli_query($this->conn, $sql);
   }
 }
 
